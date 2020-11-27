@@ -7,13 +7,13 @@ type ErrorFormat = {
 };
 
 type ErrorResponse = {
-  id: number;
+  id: number | null;
   result: null;
   error: ErrorFormat;
 };
 
 export default class PaycomException extends Error {
-  public requestId: number;
+  public request_id: number | null;
   public data?: string | null;
 
   public error!: ErrorFormat;
@@ -26,13 +26,13 @@ export default class PaycomException extends Error {
    * @param string|null $data parameter name, that resulted to this error.
    */
   constructor(
-    requestId: number,
-    message: string,
+    request_id: number | null,
+    message: string | null,
     code: number,
     data: string | null = null
   ) {
-    super(message);
-    this.requestId = requestId;
+    super(message || "");
+    this.request_id = request_id;
     this.data = data;
 
     // prepare error data
@@ -49,7 +49,7 @@ export default class PaycomException extends Error {
 
   async send(res: Response): Promise<void> {
     const response = {
-      id: this.requestId,
+      id: this.request_id,
       result: null,
       error: this.error,
     };
@@ -59,7 +59,7 @@ export default class PaycomException extends Error {
 
   response(): ErrorResponse {
     return {
-      id: this.requestId,
+      id: this.request_id,
       result: null,
       error: this.error,
     };

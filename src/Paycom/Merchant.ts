@@ -10,20 +10,18 @@ const password = readFileSync(
   join(process.cwd(), paycomConfig.keyFile)
 ).toString();
 
-export default function Merchant(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  const user = auth(req);
-  if (!user || user.name != username || user.pass != password) {
-    new PaycomException(
-      1,
-      "Insufficient privilege to perform this method.",
-      PaycomException.ERROR_INSUFFICIENT_PRIVILEGE
-    ).send(res);
-  } else {
-    (req as any).user = user;
-    next();
+export default class Merchant {
+  constructor(private req: Request) {}
+
+  public Authorize($request_id: number | null) {
+    const user = auth(this.req);
+    if (!user || user.name != username || user.pass != password) {
+      throw new PaycomException(
+        1,
+        "Insufficient privilege to perform this method.",
+        PaycomException.ERROR_INSUFFICIENT_PRIVILEGE
+      );
+    }
+    return;
   }
 }
