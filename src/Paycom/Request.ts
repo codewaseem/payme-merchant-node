@@ -12,11 +12,7 @@ export default class Request {
   public method!: string | null;
 
   /** @var object request parameters, such as <em>amount</em>, <em>account</em> */
-  public params: {
-    amount: number;
-    request_id: number | null;
-    account: { [key: string]: any };
-  };
+  public params: RequestParams;
 
   /** @var int amount value in coins */
   public amount!: number | null;

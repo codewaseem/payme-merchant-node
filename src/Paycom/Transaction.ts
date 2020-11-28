@@ -3,14 +3,14 @@ import TransactionEntity from "./entities/TransactionEntity";
 import Format from "./Format";
 import PaycomException from "./PaycomException";
 
-enum TransactionState {
+export enum TransactionState {
   STATE_CREATED = 1,
   STATE_COMPLETED = 2,
   STATE_CANCELLED = -1,
   STATE_CANCELLED_AFTER_COMPLETE = -2,
 }
 
-enum Reason {
+export enum CancelReason {
   REASON_RECEIVERS_NOT_FOUND = 1,
   REASON_PROCESSING_EXECUTION_FAILED = 2,
   REASON_EXECUTION_FAILED = 3,
@@ -113,7 +113,7 @@ export class Transaction extends TransactionEntity {
    * @return Transaction|Transaction[]
    * @throws PaycomException invalid parameters specified
    */
-  public async find(params: any): Promise<Transaction | Transaction[] | null> {
+  public async find(params: any): Promise<Transaction | null> {
     const manager = getManager();
 
     let res: TransactionEntity[] | undefined;

@@ -2,7 +2,7 @@ import { getManager } from "typeorm";
 import OrderEntity from "./entities/OrderEntity";
 import PaycomException from "./PaycomException";
 
-enum OrderState {
+export enum OrderState {
   STATE_AVAILABLE,
   STATE_WAITING_PAY,
   STATE_PAY_ACCEPTED,
@@ -20,7 +20,7 @@ export default class Order extends OrderEntity {
   //      * @return bool true - if validation passes
   //      * @throws PaycomException - if validation fails
   //      */
-  public async validate(params: any): Promise<void> {
+  public async validate(params: RequestParams): Promise<void> {
     // todo: Validate amount, if failed throw error
     // for example, check amount is numeric
     if (!is_numeric(params["amount"])) {
@@ -92,7 +92,7 @@ export default class Order extends OrderEntity {
    * @param mixed $params parameters.
    * @return Order|Order[] found order or array of orders.
    */
-  public async find(params: any): Promise<Order | null> {
+  public async find(params: { [key: string]: any }): Promise<Order | null> {
     // todo: Implement searching order(s) by given parameters, populate current instance with data
 
     // Example implementation to load order by id
@@ -135,7 +135,7 @@ export default class Order extends OrderEntity {
    * Check, whether order can be cancelled or not.
    * @return bool true - order is cancellable, otherwise false.
    */
-  public allowCancel() {
+  public allowCancel(): boolean {
     // todo: Implement order cancelling allowance check
 
     // Example implementation
@@ -183,7 +183,7 @@ export default class Order extends OrderEntity {
   }
 }
 
-function is_numeric(number: any) {
+function is_numeric(number: number) {
   const n = Number(number);
   if (typeof n == "number" && !Number.isNaN(n) && Number.isFinite(n)) {
     return true;

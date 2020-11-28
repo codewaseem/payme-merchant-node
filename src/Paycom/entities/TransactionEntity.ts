@@ -41,7 +41,7 @@ export default class TransactionEntity {
     length: 13,
     collation: "utf8_unicode_ci",
   })
-  paycom_time!: string;
+  paycom_time!: number;
 
   @Column({
     type: "datetime",

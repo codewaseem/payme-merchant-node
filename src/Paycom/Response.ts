@@ -32,7 +32,11 @@ export default class Response {
    * @param string $data parameter name, that resulted to this error.
    * @throws PaycomException
    */
-  error(code: number, message = null, data = null): void {
+  error(
+    code: number,
+    message: string | null = null,
+    data: string | null = null
+  ): void {
     throw new PaycomException(this.req.id, message, code, data);
   }
 }

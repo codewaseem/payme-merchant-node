@@ -75,7 +75,7 @@ export default class PaycomException extends Error {
   static ERROR_COULD_NOT_CANCEL = -31007;
   static ERROR_COULD_NOT_PERFORM = -31008;
 
-  static message(ru: string, uz = "", en = "") {
+  static message(ru: string, uz = "", en = ""): string {
     return JSON.stringify({
       ru,
       uz,

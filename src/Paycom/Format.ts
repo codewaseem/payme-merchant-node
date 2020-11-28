@@ -6,7 +6,7 @@ export default class Format {
    * @param int|string $coins coins.
    * @return float coins converted to som.
    */
-  public static toSom(coins: number) {
+  public static toSom(coins: number): number {
     return (1 * coins) / 100;
   }
 
@@ -15,7 +15,7 @@ export default class Format {
    * @param float $amount
    * @return int
    */
-  public static toCoins($amount: number) {
+  public static toCoins($amount: number): number {
     return Math.round(1 * $amount * 100);
   }
 
@@ -24,7 +24,7 @@ export default class Format {
    * @param bool $milliseconds true - get timestamp in milliseconds, false - in seconds.
    * @return int current timestamp value
    */
-  public static timestamp(milliseconds = false) {
+  public static timestamp(milliseconds = false): number {
     if (milliseconds) {
       return Date.now(); // milliseconds
     }
@@ -37,7 +37,7 @@ export default class Format {
    * @param int $timestamp timestamp in milliseconds.
    * @return int timestamp in seconds.
    */
-  public static timestamp2seconds(timestamp: number) {
+  public static timestamp2seconds(timestamp: number): number {
     // is it already as seconds
     if (String(timestamp).length == 10) {
       return timestamp;
@@ -50,7 +50,7 @@ export default class Format {
    * @param int $timestamp timestamp in seconds.
    * @return int timestamp in milliseconds.
    */
-  public static timestamp2milliseconds(timestamp: number) {
+  public static timestamp2milliseconds(timestamp: number): number {
     // is it already as milliseconds
     if (String(timestamp).length == 13) {
       return timestamp;
@@ -64,7 +64,7 @@ export default class Format {
    * @param int $timestamp timestamp value as seconds or milliseconds.
    * @return string string representation of the timestamp value in 'Y-m-d H:i:s' format.
    */
-  public static timestamp2datetime(timestamp: number) {
+  public static timestamp2datetime(timestamp: number): string {
     // if as milliseconds, convert to seconds
     if (String(timestamp).length == 13) {
       timestamp = this.timestamp2seconds(timestamp);
