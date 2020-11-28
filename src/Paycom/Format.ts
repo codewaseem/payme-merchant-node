@@ -79,7 +79,7 @@ export default class Format {
    * @param string $datetime date time string.
    * @return int timestamp as milliseconds.
    */
-  public static datetime2timestamp(datetime: string): number {
-    return dayjs(datetime).valueOf();
+  public static datetime2timestamp(datetime: string | null): number {
+    return dayjs(datetime || undefined).valueOf();
   }
 }

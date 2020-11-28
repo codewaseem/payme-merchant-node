@@ -76,10 +76,10 @@ export default class PaycomException extends Error {
   static ERROR_COULD_NOT_PERFORM = -31008;
 
   static message(ru: string, uz = "", en = "") {
-    return {
+    return JSON.stringify({
       ru,
       uz,
       en,
-    };
+    });
   }
 }

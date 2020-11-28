@@ -1,297 +1,193 @@
-/**
- * Class Order
- *
- * Example MySQL table might look like to the following:
- *
- * CREATE TABLE orders
- * (
- *     id          INT AUTO_INCREMENT PRIMARY KEY,
- *     product_ids VARCHAR(255)   NOT NULL,
- *     amount      DECIMAL(18, 2) NOT NULL,
- *     state       TINYINT(1)     NOT NULL,
- *     user_id     INT            NOT NULL,
- *     phone       VARCHAR(15)    NOT NULL
- * ) ENGINE = InnoDB;
- *
- */
+import { getManager } from "typeorm";
+import OrderEntity from "./entities/OrderEntity";
+import PaycomException from "./PaycomException";
 
-import {
-  Column,
-  Entity,
-  ObjectID,
-  ObjectIdColumn,
-  PrimaryGeneratedColumn,
-} from "typeorm";
-
-@Entity()
-export default class Order {
-  @ObjectIdColumn()
-  id!: ObjectID;
-
-  @Column()
-  product_ids!: string;
-
-  @Column({
-    type: "decimal",
-    length: 18,
-    precision: 2,
-  })
-  amount!: number;
-
-  @Column({
-    type: "tinyint",
-  })
-  state!: number;
-
-  @Column({
-    type: "int",
-  })
-  user_id!: number;
-
-  @Column({
-    type: "varchar",
-    length: 15,
-  })
-  phone!: string;
+enum OrderState {
+  STATE_AVAILABLE,
+  STATE_WAITING_PAY,
+  STATE_PAY_ACCEPTED,
+  STATE_CANCELLED,
 }
 
-// class Order extends Database
-// {
-//     /** Order is available for sell, anyone can buy it. */
-//     const STATE_AVAILABLE = 0;
+export default class Order extends OrderEntity {
+  constructor(private request_id: number | null) {
+    super();
+  }
 
-//     /** Pay in progress, order must not be changed. */
-//     const STATE_WAITING_PAY = 1;
+  //     /**
+  //      * Validates amount and account values.
+  //      * @param array $params amount and account parameters to validate.
+  //      * @return bool true - if validation passes
+  //      * @throws PaycomException - if validation fails
+  //      */
+  public async validate(params: any): Promise<void> {
+    // todo: Validate amount, if failed throw error
+    // for example, check amount is numeric
+    if (!is_numeric(params["amount"])) {
+      throw new PaycomException(
+        this.request_id,
+        "Incorrect amount.",
+        PaycomException.ERROR_INVALID_AMOUNT
+      );
+    }
 
-//     /** Order completed and not available for sell. */
-//     const STATE_PAY_ACCEPTED = 2;
+    // todo: Validate account, if failed throw error
+    // assume, we should have order_id
+    if (!params["account"]["order_id"]) {
+      throw new PaycomException(
+        this.request_id,
+        PaycomException.message(
+          "Неверный код заказа.",
+          "Harid kodida xatolik.",
+          "Incorrect order code."
+        ),
+        PaycomException.ERROR_INVALID_ACCOUNT,
+        "order_id"
+      );
+    }
 
-//     /** Order is cancelled. */
-//     const STATE_CANCELLED = 3;
+    // todo: Check is order available
 
-//     public $request_id;
-//     public $params;
+    // assume, after find() $this will be populated with Order data
+    const manager = getManager();
+    const order = await manager.findOne(OrderEntity);
 
-//     // todo: Adjust Order specific fields for your needs
+    // Check, is order found by specified order_id
+    if (!order || !order.id) {
+      throw new PaycomException(
+        this.request_id,
+        PaycomException.message(
+          "Неверный код заказа.",
+          "Harid kodida xatolik.",
+          "Incorrect order code."
+        ),
+        PaycomException.ERROR_INVALID_ACCOUNT,
+        "order_id"
+      );
+    }
 
-//     /**
-//      * Order ID
-//      */
-//     public $id;
+    // validate amount
+    // convert $this->amount to coins
+    // $params['amount'] already in coins
+    if (100 * this.amount != Number(params["amount"])) {
+      throw new PaycomException(
+        this.request_id,
+        "Incorrect amount.",
+        PaycomException.ERROR_INVALID_AMOUNT
+      );
+    }
 
-//     /**
-//      * IDs of the selected products/services
-//      */
-//     public $product_ids;
+    // for example, order state before payment should be 'waiting pay'
+    if (this.state != OrderState.STATE_WAITING_PAY) {
+      throw new PaycomException(
+        this.request_id,
+        "Order state is invalid.",
+        PaycomException.ERROR_COULD_NOT_PERFORM
+      );
+    }
+  }
 
-//     /**
-//      * Total price of the selected products/services
-//      */
-//     public $amount;
+  /**
+   * Find order by given parameters.
+   * @param mixed $params parameters.
+   * @return Order|Order[] found order or array of orders.
+   */
+  public async find(params: any): Promise<Order | null> {
+    // todo: Implement searching order(s) by given parameters, populate current instance with data
 
-//     /**
-//      * State of the order
-//      */
-//     public $state;
+    // Example implementation to load order by id
+    if (params["order_id"]) {
+      const manager = getManager();
 
-//     /**
-//      * ID of the customer created the order
-//      */
-//     public $user_id;
+      const order = await manager.findOne(OrderEntity, {
+        id: params["order_id"],
+      });
 
-//     /**
-//      * Phone number of the user
-//      */
-//     public $phone;
+      if (!order) return null;
 
-//     public function __construct($request_id)
-//     {
-//         $this->request_id = $request_id;
-//     }
+      this.id = order.id;
+      this.amount = order.amount;
+      this.product_ids = JSON.parse(order.product_ids);
+      this.state = order.state;
+      this.user_id = order.user_id;
+      this.phone = order.phone;
 
-//     /**
-//      * Validates amount and account values.
-//      * @param array $params amount and account parameters to validate.
-//      * @return bool true - if validation passes
-//      * @throws PaycomException - if validation fails
-//      */
-//     public function validate(array $params)
-//     {
-//         // todo: Validate amount, if failed throw error
-//         // for example, check amount is numeric
-//         if (!is_numeric($params['amount'])) {
-//             throw new PaycomException(
-//                 $this->request_id,
-//                 'Incorrect amount.',
-//                 PaycomException::ERROR_INVALID_AMOUNT
-//             );
-//         }
+      return this;
+    } else return null;
+  }
 
-//         // todo: Validate account, if failed throw error
-//         // assume, we should have order_id
-//         if (!isset($params['account']['order_id']) || !$params['account']['order_id']) {
-//             throw new PaycomException(
-//                 $this->request_id,
-//                 PaycomException::message(
-//                     'Неверный код заказа.',
-//                     'Harid kodida xatolik.',
-//                     'Incorrect order code.'
-//                 ),
-//                 PaycomException::ERROR_INVALID_ACCOUNT,
-//                 'order_id'
-//             );
-//         }
+  /**
+   * Change order's state to specified one.
+   * @param int $state new state of the order
+   * @return void
+   */
+  public async changeState(state: number): Promise<void> {
+    // todo: Implement changing order state (reserve order after create transaction or free order after cancel)
 
-//         // todo: Check is order available
+    // Example implementation
+    if (is_numeric(state)) {
+      this.state = Number(state);
+      await this.save();
+    }
+  }
 
-//         // assume, after find() $this will be populated with Order data
-//         $order = $this->find($params['account']);
+  /**
+   * Check, whether order can be cancelled or not.
+   * @return bool true - order is cancellable, otherwise false.
+   */
+  public allowCancel() {
+    // todo: Implement order cancelling allowance check
 
-//         // Check, is order found by specified order_id
-//         if (!$order || !$order->id) {
-//             throw new PaycomException(
-//                 $this->request_id,
-//                 PaycomException::message(
-//                     'Неверный код заказа.',
-//                     'Harid kodida xatolik.',
-//                     'Incorrect order code.'
-//                 ),
-//                 PaycomException::ERROR_INVALID_ACCOUNT,
-//                 'order_id'
-//             );
-//         }
+    // Example implementation
+    return false; // do not allow cancellation
+  }
 
-//         // validate amount
-//         // convert $this->amount to coins
-//         // $params['amount'] already in coins
-//         if ((100 * $this->amount) != (1 * $params['amount'])) {
-//             throw new PaycomException(
-//                 $this->request_id,
-//                 'Incorrect amount.',
-//                 PaycomException::ERROR_INVALID_AMOUNT
-//             );
-//         }
+  /**
+   * Saves this order.
+   * @throws PaycomException
+   */
+  public async save(): Promise<void> {
+    try {
+      const manager = getManager();
 
-//         // for example, order state before payment should be 'waiting pay'
-//         if ($this->state != self::STATE_WAITING_PAY) {
-//             throw new PaycomException(
-//                 $this->request_id,
-//                 'Order state is invalid.',
-//                 PaycomException::ERROR_COULD_NOT_PERFORM
-//             );
-//         }
+      if (!this.id) {
+        // If new order, set its state to waiting
+        this.state = OrderState.STATE_WAITING_PAY;
 
-//         // keep params for further use
-//         $this->params = $params;
+        // todo: Set customer ID
+        // $this->user_id = 1 * SomeSessionManager::get('user_id');
 
-//         return true;
-//     }
+        const savedOrder = await manager.save({
+          ...this,
+          product_ids: JSON.stringify(this.product_ids),
+        });
+        this.id = savedOrder.id;
+      } else {
+        await manager.update(
+          OrderEntity,
+          {
+            id: this.id,
+          },
+          {
+            state: this.state,
+          }
+        );
+      }
+    } catch (e) {
+      throw new PaycomException(
+        this.request_id,
+        "Could not save order.",
+        PaycomException.ERROR_INTERNAL_SYSTEM
+      );
+    }
+  }
+}
 
-//     /**
-//      * Find order by given parameters.
-//      * @param mixed $params parameters.
-//      * @return Order|Order[] found order or array of orders.
-//      */
-//     public function find($params)
-//     {
-//         // todo: Implement searching order(s) by given parameters, populate current instance with data
+function is_numeric(number: any) {
+  const n = Number(number);
+  if (typeof n == "number" && !Number.isNaN(n) && Number.isFinite(n)) {
+    return true;
+  }
 
-//         // Example implementation to load order by id
-//         if (isset($params['order_id'])) {
-
-//             $sql        = "select * from orders where id=:orderId";
-//             $sth        = self::db()->prepare($sql);
-//             $is_success = $sth->execute([':orderId' => $params['order_id']]);
-
-//             if ($is_success) {
-
-//                 $row = $sth->fetch();
-
-//                 if ($row) {
-
-//                     $this->id          = 1 * $row['id'];
-//                     $this->amount      = 1 * $row['amount'];
-//                     $this->product_ids = json_decode($row['product_ids'], true);
-//                     $this->state       = 1 * $row['state'];
-//                     $this->user_id     = 1 * $row['user_id'];
-//                     $this->phone       = $row['phone'];
-
-//                     return $this;
-
-//                 }
-
-//             }
-
-//         }
-
-//         return null;
-//     }
-
-//     /**
-//      * Change order's state to specified one.
-//      * @param int $state new state of the order
-//      * @return void
-//      */
-//     public function changeState($state)
-//     {
-//         // todo: Implement changing order state (reserve order after create transaction or free order after cancel)
-
-//         // Example implementation
-//         $this->state = 1 * $state;
-//         $this->save();
-//     }
-
-//     /**
-//      * Check, whether order can be cancelled or not.
-//      * @return bool true - order is cancellable, otherwise false.
-//      */
-//     public function allowCancel()
-//     {
-//         // todo: Implement order cancelling allowance check
-
-//         // Example implementation
-//         return false; // do not allow cancellation
-//     }
-
-//     /**
-//      * Saves this order.
-//      * @throws PaycomException
-//      */
-//     public function save()
-//     {
-//         $db = self::db();
-
-//         if (!$this->id) {
-
-//             // If new order, set its state to waiting
-//             $this->state = self::STATE_WAITING_PAY;
-
-//             // todo: Set customer ID
-//             // $this->user_id = 1 * SomeSessionManager::get('user_id');
-
-//             $sql        = "insert into orders set product_ids = :pProdIds, amount = :pAmount, state = :pState, user_id = :pUserId, phone = :pPhone";
-//             $sth        = $db->prepare($sql);
-//             $is_success = $sth->execute([
-//                 ':pProdIds' => json_encode($this->product_ids),
-//                 ':pAmount'  => $this->amount,
-//                 ':pState'   => $this->state,
-//                 ':pUserId'  => $this->user_id,
-//                 ':pPhone'   => $this->phone,
-//             ]);
-
-//             if ($is_success) {
-//                 $this->id = $db->lastInsertId();
-//             }
-//         } else {
-
-//             $sql        = "update orders set state = :pState where id = :pId";
-//             $sth        = $db->prepare($sql);
-//             $is_success = $sth->execute([':pState' => $this->state, ':pId' => $this->id]);
-
-//         }
-
-//         if (!$is_success) {
-//             throw new PaycomException($this->request_id, 'Could not save order.', PaycomException::ERROR_INTERNAL_SYSTEM);
-//         }
-//     }
-// }
+  return false;
+}

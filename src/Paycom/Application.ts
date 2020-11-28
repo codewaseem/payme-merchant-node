@@ -11,7 +11,6 @@ const Application = Router();
 Application.post("/", async (req, res) => {
   try {
     const db = await Database.db();
-    console.log(db.isConnected);
     const request = new Request(req);
     const response = new Response(request, res);
     const merchant = new Merchant(req);
