@@ -11,15 +11,18 @@ import { CancelReason, Transaction, TransactionState } from "./Transaction";
 import Format from "./Format";
 
 export default class Application {
-  public request;
-  public response;
-  public merchant;
+  public request: Request;
+  public response: Response;
+  public merchant: Merchant;
 
   /**
    * Application constructor.
    * @param array $config configuration array with <em>merchant_id</em>, <em>login</em>, <em>keyFile</em> keys.
    */
-  public constructor(req: ExpressRequest, res: ExpressResponse) {
+  public constructor(
+    private req: ExpressRequest,
+    private res: ExpressResponse
+  ) {
     this.request = new Request(req);
     this.response = new Response(this.request, res);
     this.merchant = new Merchant(req);
@@ -65,20 +68,26 @@ export default class Application {
           break;
       }
     } catch (e) {
-      e.send();
+      if (e instanceof PaycomException) {
+        e.send(this.res);
+      } else {
+        this.response.error(PaycomException.ERROR_INTERNAL_SYSTEM, e);
+      }
     }
   }
 
   private async CheckPerformTransaction() {
     const order = new Order(this.request.id);
-    order.find(this.request.params["account"]);
+    await order.find(this.request.params["account"]);
 
     // validate parameters
-    order.validate(this.request.params);
+    await order.validate(this.request.params);
 
     // todo: Check is there another active or completed transaction for this order
     const transaction = new Transaction();
+
     const found = await transaction.find(this.request.params);
+
     if (
       found &&
       (found.state == TransactionState.STATE_CREATED ||
@@ -119,10 +128,10 @@ export default class Application {
 
   private async CreateTransaction() {
     const order = new Order(this.request.id);
-    order.find(this.request.params["account"]);
+    await order.find(this.request.params["account"]);
 
     // validate parameters
-    order.validate(this.request.params);
+    await order.validate(this.request.params);
 
     // todo: Check, is there any other transaction for this order/service
     let transaction = new Transaction();
@@ -244,14 +253,14 @@ export default class Application {
           // todo: Mark order/service as completed
           const params = { order_id: found.order_id };
           const order = new Order(this.request.id);
-          order.find(params);
-          order.changeState(OrderState.STATE_PAY_ACCEPTED);
+          await order.find(params);
+          await order.changeState(OrderState.STATE_PAY_ACCEPTED);
 
           // todo: Mark transaction as completed
           const perform_time = Format.timestamp(true);
           found.state = TransactionState.STATE_COMPLETED;
           found.perform_time = Format.timestamp2datetime(perform_time);
-          found.save();
+          await found.save();
 
           this.response.send({
             transaction: found.id,
@@ -314,8 +323,8 @@ export default class Application {
 
           // change order state to cancelled
           const order = new Order(this.request.id);
-          order.find(this.request.params);
-          order.changeState(OrderState.STATE_CANCELLED);
+          await order.find(this.request.params);
+          await order.changeState(OrderState.STATE_CANCELLED);
 
           // send response
           this.response.send({
@@ -330,7 +339,7 @@ export default class Application {
         {
           // find order and check, whether cancelling is possible this order
           const order = new Order(this.request.id);
-          order.find(this.request.params);
+          await order.find(this.request.params);
           if (order.allowCancel()) {
             // cancel and change state to cancelled
             found.cancel(1 * this.request.params["reason"]);
