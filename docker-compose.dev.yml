@@ -1,32 +1,21 @@
 version: "3.8"
 services:
-  redis:
-    restart: always
-    image: "redis:alpine"
-    ports:
-      - 6379:6379
-    command: redis-server
+  mongodb:
+    image: mongo:latest
+    container_name: paycom-db
     volumes:
-      - ./data:/data
-  chrome:
+      - paycomgwdb:/var/lib/mysql
     restart: always
-    image: "browserless/chrome"
-    environment:
-      - CONNECTION_TIMEOUT=300000
-      - MAX_CONCURRENT_SESSIONS=3
-      - ENABLE_CORS=true
-    ports:
-      - 3000:3000
-  app:
-    restart: always
+  api:
     build:
       context: .
+    image: paycom-api:latest
+    container_name: paycom-api
+    depends_on:
+      - mongodb
     ports:
       - 1338:1338
-      - 9229:9229
-    environment:
-      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
-      - REDIS_HOST=redis
-    volumes:
-      - ./:/usr/app
-    command: yarn dev
+    restart: always
+
+volumes:
+  paycomgwdb:

@@ -1,4 +1,5 @@
 import { Router } from "express";
+import Database from "./Database";
 import Merchant from "./Merchant";
 import Request from "./Request";
 import Response from "./Response";
@@ -7,8 +8,10 @@ const Application = Router();
 
 // use merchant authorization by middleware
 
-Application.post("/", (req, res) => {
+Application.post("/", async (req, res) => {
   try {
+    const db = await Database.db();
+    console.log(db.isConnected);
     const request = new Request(req);
     const response = new Response(request, res);
     const merchant = new Merchant(req);
@@ -19,7 +22,6 @@ Application.post("/", (req, res) => {
   } catch (e) {
     res.send(e);
   }
-  res.send("ok");
 });
 
 export default Application;

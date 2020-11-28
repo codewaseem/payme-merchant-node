@@ -13,6 +13,7 @@ WORKDIR /usr/app
 COPY package.json yarn.lock ./
 RUN yarn install --production
 RUN npm install pm2 -g
+COPY password.paycom password.paycom
 COPY --from=builder /usr/app/dist ./dist
 COPY --from=builder /usr/app/.env .env
 

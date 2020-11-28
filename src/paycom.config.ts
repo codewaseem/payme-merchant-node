@@ -3,10 +3,9 @@ const paycomConfig = {
   login: "Paycom",
   keyFile: "password.paycom",
   db: {
-    host: "localhost",
-    database: "db_shop",
-    username: "db_shop_admin",
-    password: "bh6U8M8tR5sQGsfLVHdB",
+    host: "mongodb",
+    database: "shop",
+    port: 27017,
   },
 };
 
