@@ -4,6 +4,9 @@ import logger from "./utils/logger";
 import bodyParser from "body-parser";
 import Application from "./Paycom/Application";
 import Database from "./Paycom/Database";
+import OrderEntity from "./Paycom/entities/OrderEntity";
+import { getManager } from "typeorm";
+import Order from "./Paycom/Order";
 
 const startServer = async () => {
   const dbConnection = await Database.db();
@@ -24,8 +27,16 @@ const startServer = async () => {
     res.send("App is running");
   });
 
-  app.listen(config.PORT, () => {
+  app.listen(config.PORT, async () => {
     logger.info(`Server listening at ${config.PORT}`);
+    const testOrder = await getManager().save(OrderEntity, {
+      product_ids: `["1","2","3"]`,
+      amount: 150,
+      state: 1,
+      user_id: 123,
+      phone: `987654321`,
+    });
+    console.log(testOrder);
   });
 };
 
