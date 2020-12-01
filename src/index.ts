@@ -20,6 +20,10 @@ const startServer = async () => {
     application.run();
   });
 
+  app.get("/status", (req, res) => {
+    res.send("App is running");
+  });
+
   app.listen(config.PORT, () => {
     logger.info(`Server listening at ${config.PORT}`);
   });

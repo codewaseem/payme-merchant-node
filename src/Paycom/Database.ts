@@ -1,6 +1,7 @@
 import { createConnection, Connection } from "typeorm";
 import paycomConfig from "../paycom.config";
-import Order from "./Order";
+import OrderEntity from "./entities/OrderEntity";
+import TransactionEntity from "./entities/TransactionEntity";
 
 export default class Database {
   private static instance: Database;
@@ -20,7 +21,7 @@ export default class Database {
       database: paycomConfig.db.database,
       port: paycomConfig.db.port,
       synchronize: true,
-      entities: [Order],
+      entities: [OrderEntity, TransactionEntity],
     });
   }
 

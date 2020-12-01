@@ -14,7 +14,7 @@ services:
     depends_on:
       - mongodb
     ports:
-      - 1338:1338
+      - $APP_PORT:$APP_PORT
     restart: always
 
 volumes:
