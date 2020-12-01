@@ -1,5 +1,4 @@
-## Copified Engine
-
+## Payme Merchant API in Node
 ## Docker Local Dev Environment 
 
 ### Start in dev mode
