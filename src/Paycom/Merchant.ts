@@ -18,6 +18,11 @@ export default class Merchant {
   public Authorize(request_id: number | null): void {
     this.currentPassword = readFileSync(keypath).toString();
     const user = auth(this.req);
+    console.log(user);
+    console.log(username);
+    console.log(this.currentPassword);
+    console.log(user?.name != username);
+    console.log(user?.pass != this.currentPassword);
     if (!user || user.name != username || user.pass != this.currentPassword) {
       throw new PaycomException(
         request_id,
