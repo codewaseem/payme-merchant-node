@@ -6,7 +6,6 @@ import Application from "./Paycom/Application";
 import Database from "./Paycom/Database";
 import OrderEntity from "./Paycom/entities/OrderEntity";
 import { getManager } from "typeorm";
-import Order from "./Paycom/Order";
 
 const startServer = async () => {
   const dbConnection = await Database.db();
@@ -19,6 +18,7 @@ const startServer = async () => {
   app.use(bodyParser.json());
 
   app.post("/", (req, res) => {
+    console.log("request recieved");
     const application = new Application(req, res);
     application.run();
   });

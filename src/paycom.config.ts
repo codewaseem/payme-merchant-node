@@ -6,7 +6,8 @@ const paycomConfig = {
   login: "Paycom",
   keyFile: "password.paycom",
   db: {
-    host: process.env.DB_HOST,
+    url:
+      "mongodb+srv://Akros:yw1QHoLtyOUlM6XT@cluster0.3brqs.mongodb.net/Akros?retryWrites=true&w=majority",
     database: process.env.DB_NAME,
     port: Number(process.env.DB_PORT) || 27017,
   },

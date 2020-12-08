@@ -1,21 +1,10 @@
 version: "3.8"
 services:
-  mongodb:
-    image: mongo:latest
-    container_name: paycom-db
-    volumes:
-      - paycomgwdb:/var/lib/mysql
-    restart: always
   api:
     build:
       context: .
-    image: paycom-api:latest
-    container_name: paycom-api
-    depends_on:
-      - mongodb
+    image: merchant-api:latest
+    container_name: merchant-api
     ports:
       - $APP_PORT:$APP_PORT
     restart: always
-
-volumes:
-  paycomgwdb:

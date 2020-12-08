@@ -18,6 +18,6 @@ COPY --from=builder /usr/app/dist ./dist
 COPY --from=builder /usr/app/.env .env
 
 
-EXPOSE 1338
+EXPOSE 8888
 CMD [ "pm2-runtime", "dist/index.js" ]
 

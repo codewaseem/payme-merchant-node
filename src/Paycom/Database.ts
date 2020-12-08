@@ -17,11 +17,11 @@ export default class Database {
 
     this.dbConnection = await createConnection({
       type: "mongodb",
-      host: paycomConfig.db.host,
-      database: paycomConfig.db.database,
-      port: paycomConfig.db.port,
+      url: paycomConfig.db.url,
       synchronize: true,
       entities: [OrderEntity, TransactionEntity],
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
     });
   }
 
