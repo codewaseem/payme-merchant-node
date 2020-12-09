@@ -2,10 +2,8 @@ import express from "express";
 import config from "./config";
 import logger from "./utils/logger";
 import bodyParser from "body-parser";
-import Application from "./Paycom/Application";
-import Database from "./Paycom/Database";
-import OrderEntity from "./Paycom/entities/OrderEntity";
-import { getManager } from "typeorm";
+import Application from "./merchant/Application";
+import Database from "./merchant/Database";
 
 const startServer = async () => {
   const dbConnection = await Database.db();
@@ -17,8 +15,7 @@ const startServer = async () => {
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(bodyParser.json());
 
-  app.post("/", (req, res) => {
-    console.log("request recieved");
+  app.post("/merchant", (req, res) => {
     const application = new Application(req, res);
     application.run();
   });
@@ -29,14 +26,6 @@ const startServer = async () => {
 
   app.listen(config.PORT, async () => {
     logger.info(`Server listening at ${config.PORT}`);
-    const testOrder = await getManager().save(OrderEntity, {
-      product_ids: `["1","2","3"]`,
-      amount: 150,
-      state: 1,
-      user_id: 123,
-      phone: `987654321`,
-    });
-    console.log(testOrder);
   });
 };
 

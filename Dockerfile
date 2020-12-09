@@ -1,6 +1,8 @@
 # State 1
 
 FROM node:12-alpine as builder
+
+
 WORKDIR /usr/app
 COPY package.json yarn.lock ./
 RUN yarn install
@@ -19,5 +21,6 @@ COPY --from=builder /usr/app/.env .env
 
 
 EXPOSE 8888
+
 CMD [ "pm2-runtime", "dist/index.js" ]
 

@@ -3,8 +3,10 @@ services:
   api:
     build:
       context: .
-    image: merchant-api:latest
-    container_name: merchant-api
+    image: payme-api:latest
+    container_name: payme-api
     ports:
       - $APP_PORT:$APP_PORT
-    restart: always
+    volumes:
+      - ./:/usr/app
+    command: yarn dev

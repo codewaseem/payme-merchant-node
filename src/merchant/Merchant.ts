@@ -19,10 +19,10 @@ export default class Merchant {
     this.currentPassword = readFileSync(keypath).toString();
     const user = auth(this.req);
     console.log(user);
-    console.log(username);
-    console.log(this.currentPassword);
-    console.log(user?.name != username);
-    console.log(user?.pass != this.currentPassword);
+
+    console.log(`Username matched?`, user?.name == username);
+    console.log(`Password  matched?`, user?.pass == this.currentPassword);
+
     if (!user || user.name != username || user.pass != this.currentPassword) {
       throw new PaycomException(
         request_id,
