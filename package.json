@@ -5,9 +5,8 @@
   "main": "dist/index",
   "license": "ISC",
   "scripts": {
-    "copy-assets": "yarn cpy '**/*' '!**/*.ts' ../dist/ --cwd=src/ --parents",
     "del-dist": "yarn del dist",
-    "compile": "yarn del-dist && yarn tsc -b && yarn copy-assets",
+    "compile": "yarn del-dist && yarn tsc -b",
     "start": "node dist/index.js",
     "run-ts-script": "tsnd --files --respawn ",
     "dev": "yarn run-ts-script src/index.ts",
